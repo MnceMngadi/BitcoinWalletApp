@@ -36,7 +36,7 @@ jobs:
 
       # 2. Compile / Build Project
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew assembleDebug
 
       # 3. Unit Testing
       - name: Run Unit Tests
