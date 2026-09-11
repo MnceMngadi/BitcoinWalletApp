@@ -17,7 +17,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
     private const val BASE_URL = "https://api.apilayer.com/fixer/"
     private const val API_KEY = "Ct2bFQpgzGya2jjzGFakyi90jWWJh7Kh"
 
@@ -26,19 +25,22 @@ object NetworkModule {
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor(API_KEY))
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            })
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                },
+            )
             .build()
     }
 
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        val json = Json {
-            ignoreUnknownKeys = true
-            coerceInputValues = true
-        }
+        val json =
+            Json {
+                ignoreUnknownKeys = true
+                coerceInputValues = true
+            }
         val contentType = "application/json".toMediaType()
         return Retrofit.Builder()
             .baseUrl(BASE_URL)

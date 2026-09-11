@@ -9,7 +9,7 @@ interface BitcoinWalletApiService {
     @GET("latest")
     suspend fun getLatestRates(
         @Query("base") base: String? = null,
-        @Query("symbols") symbols: String? = null
+        @Query("symbols") symbols: String? = null,
     ): LatestRatesDto
 
     @GET("fluctuation")
@@ -17,7 +17,7 @@ interface BitcoinWalletApiService {
         @Query("base") base: String? = null,
         @Query("symbols") symbols: String? = null,
         @Query("start_date") startDate: String? = null,
-        @Query("end_date") endDate: String? = null
+        @Query("end_date") endDate: String? = null,
     ): FluctuationDto
 
     @GET("symbols")

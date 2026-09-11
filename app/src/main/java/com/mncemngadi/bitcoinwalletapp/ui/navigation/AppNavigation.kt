@@ -16,7 +16,7 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Wallet.route
+        startDestination = Screen.Wallet.route,
     ) {
         composable(Screen.Wallet.route) {
             WalletScreen()

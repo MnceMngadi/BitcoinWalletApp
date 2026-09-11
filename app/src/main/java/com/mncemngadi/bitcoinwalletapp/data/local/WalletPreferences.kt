@@ -15,18 +15,21 @@ import javax.inject.Singleton
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "wallet_prefs")
 
 @Singleton
-class WalletPreferences @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
-    private val btcAmountKey = doublePreferencesKey("btc_amount")
+class WalletPreferences
+    @Inject
+    constructor(
+        @ApplicationContext private val context: Context,
+    ) {
+        private val btcAmountKey = doublePreferencesKey("btc_amount")
 
-    val btcAmount: Flow<Double> = context.dataStore.data.map { preferences ->
-        preferences[btcAmountKey] ?: 0.0
-    }
+        val btcAmount: Flow<Double> =
+            context.dataStore.data.map { preferences ->
+                preferences[btcAmountKey] ?: 0.0
+            }
 
-    suspend fun saveBtcAmount(amount: Double) {
-        context.dataStore.edit { preferences ->
-            preferences[btcAmountKey] = amount
+        suspend fun saveBtcAmount(amount: Double) {
+            context.dataStore.edit { preferences ->
+                preferences[btcAmountKey] = amount
+            }
         }
     }
-}

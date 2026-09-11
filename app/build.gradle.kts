@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ktlint)
 }
 
 android {
@@ -26,7 +27,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -40,6 +41,14 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+}
+
+// ktlint dependencies for android insure good coding style makes sure that it ignores anotations with "Compasable"
+ktlint {
+    version.set("1.1.1")
+    android.set(true)
+    additionalEditorconfig.put("ktlint_code_style", "android")
+    additionalEditorconfig.put("ktlint_function_naming_ignore_when_annotated_with", "Composable")
 }
 
 dependencies {

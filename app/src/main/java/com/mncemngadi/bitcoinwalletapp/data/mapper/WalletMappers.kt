@@ -8,7 +8,7 @@ fun LatestRatesDto.toDomain(): List<CurrencyRate> {
         CurrencyRate(
             code = code,
             rate = rate,
-            name = getCurrencyName(code)
+            name = getCurrencyName(code),
         )
     } ?: emptyList()
 }

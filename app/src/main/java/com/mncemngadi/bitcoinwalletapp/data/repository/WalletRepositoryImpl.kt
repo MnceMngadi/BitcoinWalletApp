@@ -12,60 +12,64 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class WalletRepositoryImpl @Inject constructor(
-    private val apiService: BitcoinWalletApiService,
-    private val preferences: WalletPreferences
-) : WalletRepository {
+class WalletRepositoryImpl
+    @Inject
+    constructor(
+        private val apiService: BitcoinWalletApiService,
+        private val preferences: WalletPreferences,
+    ) : WalletRepository {
+        // Simple in-memory cache
+        private var cachedRates: List<CurrencyRate>? = null
+        private var lastFetchTime: Long = 0
+        private val cacheTimeout = 10 * 60 * 1000 // 10 minutes
 
-    // Simple in-memory cache
-    private var cachedRates: List<CurrencyRate>? = null
-    private var lastFetchTime: Long = 0
-    private val cacheTimeout = 10 * 60 * 1000 // 10 minutes
+        override fun getBtcAmount(): Flow<Double> = preferences.btcAmount
 
-    override fun getBtcAmount(): Flow<Double> = preferences.btcAmount
-
-    override suspend fun updateBtcAmount(amount: Double) {
-        preferences.saveBtcAmount(amount)
-    }
-
-    override suspend fun getLatestRates(base: String, symbols: List<String>): Either<Failure, List<CurrencyRate>> {
-        val currentTime = System.currentTimeMillis()
-        if (cachedRates != null && (currentTime - lastFetchTime) < cacheTimeout) {
-            return Either.Right(cachedRates!!)
+        override suspend fun updateBtcAmount(amount: Double) {
+            preferences.saveBtcAmount(amount)
         }
 
-        return try {
-            val response = apiService.getLatestRates()
-            if (response.success && response.rates != null) {
-                val allRates = response.toDomain()
-                val domainRates = allRates.filter { it.code in symbols }
-                cachedRates = domainRates
-                lastFetchTime = currentTime
-                Either.Right(domainRates)
-            } else {
-                Either.Left(Failure.ServerError)
+        override suspend fun getLatestRates(
+            base: String,
+            symbols: List<String>,
+        ): Either<Failure, List<CurrencyRate>> {
+            val currentTime = System.currentTimeMillis()
+            if (cachedRates != null && (currentTime - lastFetchTime) < cacheTimeout) {
+                return Either.Right(cachedRates!!)
             }
-        } catch (e: Exception) {
-            Either.Left(Failure.UnknownError(e.message))
-        }
-    }
 
-    override suspend fun getFluctuation(
-        base: String,
-        symbols: List<String>,
-        startDate: String,
-        endDate: String
-    ): Either<Failure, Map<String, Double>> {
-        return try {
-            val response = apiService.getFluctuation(base, symbols.joinToString(","), startDate, endDate)
-            if (response.success && response.rates != null) {
-                val changes = response.rates.mapValues { it.value.change_pct }
-                Either.Right(changes)
-            } else {
-                Either.Left(Failure.ServerError)
+            return try {
+                val response = apiService.getLatestRates()
+                if (response.success && response.rates != null) {
+                    val allRates = response.toDomain()
+                    val domainRates = allRates.filter { it.code in symbols }
+                    cachedRates = domainRates
+                    lastFetchTime = currentTime
+                    Either.Right(domainRates)
+                } else {
+                    Either.Left(Failure.ServerError)
+                }
+            } catch (e: Exception) {
+                Either.Left(Failure.UnknownError(e.message))
             }
-        } catch (e: Exception) {
-            Either.Left(Failure.UnknownError(e.message))
+        }
+
+        override suspend fun getFluctuation(
+            base: String,
+            symbols: List<String>,
+            startDate: String,
+            endDate: String,
+        ): Either<Failure, Map<String, Double>> {
+            return try {
+                val response = apiService.getFluctuation(base, symbols.joinToString(","), startDate, endDate)
+                if (response.success && response.rates != null) {
+                    val changes = response.rates.mapValues { it.value.change_pct }
+                    Either.Right(changes)
+                } else {
+                    Either.Left(Failure.ServerError)
+                }
+            } catch (e: Exception) {
+                Either.Left(Failure.UnknownError(e.message))
+            }
         }
     }
-}

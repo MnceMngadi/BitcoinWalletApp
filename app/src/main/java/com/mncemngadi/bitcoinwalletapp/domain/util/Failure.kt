@@ -6,7 +6,9 @@ package com.mncemngadi.bitcoinwalletapp.domain.util
  */
 sealed class Failure {
     object NetworkConnection : Failure()
+
     object ServerError : Failure()
+
     data class UnknownError(val message: String? = null) : Failure()
 
     /** * Extend this class for feature specific failures.*/
