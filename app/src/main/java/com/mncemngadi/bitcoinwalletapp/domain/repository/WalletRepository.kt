@@ -15,6 +15,12 @@ interface WalletRepository {
         symbols: List<String>,
     ): Either<Failure, List<CurrencyRate>>
 
+    suspend fun getHistoricalRates(
+        date: String,
+        base: String,
+        symbols: List<String>,
+    ): Either<Failure, List<CurrencyRate>>
+
     suspend fun getFluctuation(
         base: String,
         symbols: List<String>,

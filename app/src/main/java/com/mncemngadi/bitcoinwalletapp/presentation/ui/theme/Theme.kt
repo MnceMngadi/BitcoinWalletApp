@@ -1,4 +1,4 @@
-package com.mncemngadi.bitcoinwalletapp.ui.theme
+package com.mncemngadi.bitcoinwalletapp.presentation.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

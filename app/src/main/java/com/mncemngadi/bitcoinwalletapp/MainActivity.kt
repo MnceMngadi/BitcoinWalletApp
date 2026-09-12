@@ -7,8 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.mncemngadi.bitcoinwalletapp.ui.navigation.AppNavigation
-import com.mncemngadi.bitcoinwalletapp.ui.theme.BitcoinWalletAppTheme
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.navigation.AppNavigation
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.theme.BitcoinWalletAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

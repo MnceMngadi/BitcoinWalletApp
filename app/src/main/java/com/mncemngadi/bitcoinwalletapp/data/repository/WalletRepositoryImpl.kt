@@ -8,6 +8,8 @@ import com.mncemngadi.bitcoinwalletapp.domain.repository.WalletRepository
 import com.mncemngadi.bitcoinwalletapp.domain.util.Either
 import com.mncemngadi.bitcoinwalletapp.domain.util.Failure
 import kotlinx.coroutines.flow.Flow
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,7 +41,11 @@ class WalletRepositoryImpl
             }
 
             return try {
-                val response = apiService.getLatestRates()
+                val response =
+                    apiService.getLatestRates(
+                        base = base,
+                        symbols = symbols.joinToString(","),
+                    )
                 if (response.success && response.rates != null) {
                     val allRates = response.toDomain()
                     val domainRates = allRates.filter { it.code in symbols }
@@ -47,8 +53,65 @@ class WalletRepositoryImpl
                     lastFetchTime = currentTime
                     Either.Right(domainRates)
                 } else {
-                    Either.Left(Failure.ServerError)
+                    val apiMessage = response.error?.info ?: response.error?.type ?: "Server Error"
+                    Either.Left(Failure.ServerError(apiMessage))
                 }
+            } catch (e: HttpException) {
+                if (e.code() == 429) {
+                    Either.Left(Failure.ServerError("API Rate limit exceeded. Please try again later or update your API access key."))
+                } else {
+                    val errorBody = e.response()?.errorBody()?.string() ?: ""
+                    val errorDetail =
+                        if (errorBody.contains("info")) {
+                            // Extract basic info sentence if present in the json
+                            errorBody.substringAfter("\"info\":\"").substringBefore("\"")
+                        } else if (errorBody.contains("message")) {
+                            errorBody.substringAfter("\"message\":\"").substringBefore("\"")
+                        } else {
+                            e.message() ?: "HTTP ${e.code()}"
+                        }
+                    Either.Left(Failure.ServerError("Server Error (${e.code()}): $errorDetail"))
+                }
+            } catch (e: IOException) {
+                Either.Left(Failure.NetworkConnection)
+            } catch (e: Exception) {
+                Either.Left(Failure.UnknownError(e.message))
+            }
+        }
+
+        override suspend fun getHistoricalRates(
+            date: String,
+            base: String,
+            symbols: List<String>,
+        ): Either<Failure, List<CurrencyRate>> {
+            return try {
+                val response =
+                    apiService.getHistoricalRates(
+                        date = date,
+                        base = base,
+                        symbols = symbols.joinToString(","),
+                    )
+                if (response.success && response.rates != null) {
+                    val allRates = response.toDomain()
+                    val domainRates = allRates.filter { it.code in symbols }
+                    Either.Right(domainRates)
+                } else {
+                    val apiMessage = response.error?.info ?: response.error?.type ?: "Server Error"
+                    Either.Left(Failure.ServerError(apiMessage))
+                }
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string() ?: ""
+                val errorDetail =
+                    if (errorBody.contains("info")) {
+                        errorBody.substringAfter("\"info\":\"").substringBefore("\"")
+                    } else if (errorBody.contains("message")) {
+                        errorBody.substringAfter("\"message\":\"").substringBefore("\"")
+                    } else {
+                        e.message() ?: "HTTP ${e.code()}"
+                    }
+                Either.Left(Failure.ServerError("Server Error (${e.code()}): $errorDetail"))
+            } catch (e: IOException) {
+                Either.Left(Failure.NetworkConnection)
             } catch (e: Exception) {
                 Either.Left(Failure.UnknownError(e.message))
             }
@@ -66,8 +129,26 @@ class WalletRepositoryImpl
                     val changes = response.rates.mapValues { it.value.change_pct }
                     Either.Right(changes)
                 } else {
-                    Either.Left(Failure.ServerError)
+                    val apiMessage = response.error?.info ?: response.error?.type ?: "Server Error"
+                    Either.Left(Failure.ServerError(apiMessage))
                 }
+            } catch (e: HttpException) {
+                if (e.code() == 429) {
+                    Either.Left(Failure.ServerError("API Rate limit exceeded. Please try again later or update your API access key."))
+                } else {
+                    val errorBody = e.response()?.errorBody()?.string() ?: ""
+                    val errorDetail =
+                        if (errorBody.contains("info")) {
+                            errorBody.substringAfter("\"info\":\"").substringBefore("\"")
+                        } else if (errorBody.contains("message")) {
+                            errorBody.substringAfter("\"message\":\"").substringBefore("\"")
+                        } else {
+                            e.message() ?: "HTTP ${e.code()}"
+                        }
+                    Either.Left(Failure.ServerError("Server Error (${e.code()}): $errorDetail"))
+                }
+            } catch (e: IOException) {
+                Either.Left(Failure.NetworkConnection)
             } catch (e: Exception) {
                 Either.Left(Failure.UnknownError(e.message))
             }

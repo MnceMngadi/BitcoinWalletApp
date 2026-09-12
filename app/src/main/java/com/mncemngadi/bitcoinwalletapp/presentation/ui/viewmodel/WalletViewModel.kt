@@ -1,4 +1,4 @@
-package com.mncemngadi.bitcoinwalletapp.ui.viewmodel
+package com.mncemngadi.bitcoinwalletapp.presentation.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -43,10 +43,10 @@ class WalletViewModel
                     when (result) {
                         is Either.Left -> {
                             val errorMessage =
-                                when (result.a) {
+                                when (val failure = result.a) {
                                     is Failure.NetworkConnection -> "Network error. Please check your connection."
-                                    is Failure.ServerError -> "Server error. Please try again later."
-                                    is Failure.UnknownError -> result.a.message ?: "An unknown error occurred."
+                                    is Failure.ServerError -> failure.message ?: "Server error. Please try again later."
+                                    is Failure.UnknownError -> failure.message ?: "An unknown error occurred."
                                     else -> "An error occurred."
                                 }
                             _uiState.update { it.copy(isLoading = false, error = errorMessage) }
@@ -79,5 +79,9 @@ class WalletViewModel
 
         fun refresh() {
             loadWalletData()
+        }
+
+        fun clearError() {
+            _uiState.update { it.copy(error = null) }
         }
     }
