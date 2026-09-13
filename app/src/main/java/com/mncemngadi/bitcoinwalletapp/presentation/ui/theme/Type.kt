@@ -1,4 +1,4 @@
-package com.mncemngadi.bitcoinwalletapp.ui.theme
+package com.mncemngadi.bitcoinwalletapp.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

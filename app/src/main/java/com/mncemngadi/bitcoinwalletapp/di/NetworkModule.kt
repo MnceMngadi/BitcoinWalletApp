@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     private const val BASE_URL = "https://api.apilayer.com/fixer/"
-    private const val API_KEY = "Ct2bFQpgzGya2jjzGFakyi90jWWJh7Kh"
+    private const val API_KEY = "QFXWAEG351iKURivK2UDmWVXG4UK2Ry4"
 
     @Provides
     @Singleton

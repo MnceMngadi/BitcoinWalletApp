@@ -1,7 +1,6 @@
-package com.mncemngadi.bitcoinwalletapp.ui.screens
+package com.mncemngadi.bitcoinwalletapp.presentation.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,17 +15,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,7 +33,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.mncemngadi.bitcoinwalletapp.domain.model.CurrencyRate
-import com.mncemngadi.bitcoinwalletapp.ui.viewmodel.WalletViewModel
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.screens.components.ErrorDialog
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.screens.components.LoadingDialog
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.screens.components.MyTopAppBar
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.viewmodel.WalletViewModel
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,16 +44,17 @@ import java.util.Locale
 fun WalletScreen(viewModel: WalletViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
 
+    LoadingDialog(isLoading = uiState.isLoading)
+
+    ErrorDialog(
+        errorMessage = uiState.error,
+        onDismiss = { viewModel.clearError() },
+        onRetry = { viewModel.refresh() },
+    )
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Bitcoin Wallet") },
-                actions = {
-                    IconButton(onClick = { viewModel.refresh() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-                    }
-                },
-            )
+            MyTopAppBar(title = "Bitcoin Wallet", onRefreshClick = { viewModel.refresh() })
         },
     ) { padding ->
         Column(
@@ -80,20 +79,10 @@ fun WalletScreen(viewModel: WalletViewModel = hiltViewModel()) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else if (uiState.error != null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(uiState.error!!, color = MaterialTheme.colorScheme.error)
-                }
-            } else {
-                CurrencyList(
-                    rates = uiState.rates,
-                    btcAmount = uiState.btcAmount.toDoubleOrNull() ?: 0.0,
-                )
-            }
+            CurrencyList(
+                rates = uiState.rates,
+                btcAmount = uiState.btcAmount.toDoubleOrNull() ?: 0.0,
+            )
         }
     }
 }
