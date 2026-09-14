@@ -37,7 +37,11 @@ jobs:
       # 2. Compile / Build Project
       - name: Build with Gradle
         run: ./gradlew assembleDebug
+        env:
+          FIXER_API_KEY: ${{ secrets.FIXER_API_KEY }}
 
       # 3. Unit Testing
       - name: Run Unit Tests
         run: ./gradlew test
+        env:
+          FIXER_API_KEY: ${{ secrets.FIXER_API_KEY }}

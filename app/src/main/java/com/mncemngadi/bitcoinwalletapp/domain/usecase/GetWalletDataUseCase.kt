@@ -21,10 +21,10 @@ class GetWalletDataUseCase
         operator fun invoke(): Flow<Either<Failure, WalletData>> {
             val btcAmountFlow = repository.getBtcAmount()
 
+            // Static symbols for the API
             val symbols = listOf("BTC", "ZAR", "USD", "AUD")
 
-            // Note: Fixer Free Tier restricts 'base' to EUR only.
-            // We use EUR as a bridge to calculate the required BTC-based rates.
+            // Base currency for the API
             val apiBase = "BTC"
 
             // Create a single-shot flow that fetches network rates independently once

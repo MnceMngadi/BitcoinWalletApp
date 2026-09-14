@@ -1,6 +1,7 @@
 package com.mncemngadi.bitcoinwalletapp.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.mncemngadi.bitcoinwalletapp.BuildConfig
 import com.mncemngadi.bitcoinwalletapp.data.remote.AuthInterceptor
 import com.mncemngadi.bitcoinwalletapp.data.remote.BitcoinWalletApiService
 import dagger.Module
@@ -18,13 +19,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     private const val BASE_URL = "https://api.apilayer.com/fixer/"
-    private const val API_KEY = "QFXWAEG351iKURivK2UDmWVXG4UK2Ry4"
 
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(API_KEY))
+            .addInterceptor(AuthInterceptor(BuildConfig.FIXER_API_KEY))
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY

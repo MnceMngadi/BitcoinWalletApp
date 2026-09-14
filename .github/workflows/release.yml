@@ -30,6 +30,8 @@ jobs:
         run: |
           ./gradlew assembleRelease
           ./gradlew bundleRelease
+        env:
+          FIXER_API_KEY: ${{ secrets.FIXER_API_KEY }}
 
       # Attach built binaries directly to the published GitHub Release
       - name: Upload Artifacts to Release
