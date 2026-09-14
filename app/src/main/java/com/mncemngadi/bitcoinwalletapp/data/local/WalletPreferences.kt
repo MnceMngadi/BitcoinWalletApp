@@ -14,6 +14,10 @@ import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "wallet_prefs")
 
+/**
+ * Handles local persistence of wallet data using Jetpack DataStore.
+ * Important for saving user input so it remains available after closing the app.
+ */
 @Singleton
 class WalletPreferences
     @Inject
@@ -22,11 +26,13 @@ class WalletPreferences
     ) {
         private val btcAmountKey = doublePreferencesKey("btc_amount")
 
+        /** getting the saved BTC amount. */
         val btcAmount: Flow<Double> =
             context.dataStore.data.map { preferences ->
                 preferences[btcAmountKey] ?: 0.0
             }
 
+        /** Saves the BTC amount asynchronously. */
         suspend fun saveBtcAmount(amount: Double) {
             context.dataStore.edit { preferences ->
                 preferences[btcAmountKey] = amount

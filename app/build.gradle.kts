@@ -63,7 +63,7 @@ android {
     }
 }
 
-// ktlint dependencies for android insure good coding style makes sure that it ignores anotations with "Compasable"
+// Configure KtLint to ignore "Composable" annotations
 ktlint {
     version.set("1.1.1")
     android.set(true)
