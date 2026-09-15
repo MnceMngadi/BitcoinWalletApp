@@ -13,13 +13,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import javax.inject.Inject
 
 /**
  * Represents the state of the Wallet screen.
  */
 data class WalletUiState(
-    val btcAmount: String = "0.0",
+    val btcAmount: String = "0.00",
     val rates: List<CurrencyRate> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -71,7 +72,13 @@ class WalletViewModel
                             _uiState.update {
                                 it.copy(
                                     isLoading = false,
-                                    btcAmount = result.b.btcAmount.toString(),
+                                    btcAmount =
+                                        if (result.b.btcAmount == 0.0) {
+                                            "0.00"
+                                        } else {
+                                            BigDecimal.valueOf(result.b.btcAmount)
+                                                .stripTrailingZeros().toPlainString()
+                                        },
                                     rates = result.b.rates,
                                     error = null,
                                 )

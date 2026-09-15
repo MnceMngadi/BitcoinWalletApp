@@ -41,15 +41,18 @@ class GetWalletDataUseCase
                     val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.time
                     val yesterdayStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(yesterday)
 
+                    // Fetch price fluctuation
                     val fluctuationResult = repository.getFluctuation(apiBase, symbols, yesterdayStr, today)
 
                     val finalResult =
                         result.map { currentRates ->
-                            val btcInEurToday = currentRates.find { it.code == "BTC" }?.rate ?: 1.0
+                            // Get current BTC rate as base for conversion
+                            val btcToday = currentRates.find { it.code == "BTC" }?.rate ?: 1.0
                             val fluctuations = (fluctuationResult as? Either.Right)?.b ?: emptyMap()
 
                             currentRates.map { rateToday ->
-                                val rateInBtcToday = rateToday.rate / btcInEurToday
+                                // Convert each rate to be relative to 1 BTC
+                                val rateInBtcToday = rateToday.rate / btcToday
 
                                 rateToday.copy(
                                     rate = rateInBtcToday,

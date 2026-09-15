@@ -15,10 +15,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.theme.InputBackground
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.theme.TextSecondary
 
 /**
  * Component for the Bitcoin amount input field.
- * Allows the user to enter and update their BTC balance.
  */
 @Composable
 fun BtcInputSection(
@@ -27,7 +28,7 @@ fun BtcInputSection(
 ) {
     Column {
         Text(
-            text = "BTC AMOUNT",
+            text = "ENTER BTC AMOUNT",
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp),
@@ -39,7 +40,7 @@ fun BtcInputSection(
                 Text(
                     text = "Enter Bitcoin amount",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray,
+                    color = TextSecondary,
                 )
             },
             modifier = Modifier.fillMaxWidth(),
@@ -48,9 +49,9 @@ fun BtcInputSection(
             shape = RoundedCornerShape(12.dp),
             colors =
                 TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFE5E7EB),
-                    unfocusedContainerColor = Color(0xFFE5E7EB),
-                    disabledContainerColor = Color(0xFFE5E7EB),
+                    focusedContainerColor = InputBackground,
+                    unfocusedContainerColor = InputBackground,
+                    disabledContainerColor = InputBackground,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                 ),

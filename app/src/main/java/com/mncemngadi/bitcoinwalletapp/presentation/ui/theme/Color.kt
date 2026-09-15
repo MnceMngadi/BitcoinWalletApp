@@ -11,3 +11,8 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val BackgroundLight = Color(0xFFF9FAFB)
+
+val InputBackground = Color(0xFFE5E7EB)
+val SuccessGreen = Color(0xFF4CAF50)
+val ErrorRed = Color(0xFFF44336)
+val TextSecondary = Color.Gray

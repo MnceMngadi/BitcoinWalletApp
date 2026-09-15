@@ -21,6 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mncemngadi.bitcoinwalletapp.domain.model.CurrencyRate
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.theme.ErrorRed
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.theme.SuccessGreen
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.theme.TextSecondary
+import java.math.BigDecimal
 import java.util.Locale
 
 @Composable
@@ -46,8 +50,16 @@ fun CurrencyItem(rate: CurrencyRate) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                // Use high precision for BTC, standard precision for fiat
+                val formattedValue =
+                    if (rate.code == "BTC") {
+                        BigDecimal.valueOf(value)
+                            .stripTrailingZeros().toPlainString()
+                    } else {
+                        String.format(Locale.US, "%.2f", value)
+                    }
                 Text(
-                    text = "${rate.code} ${String.format(Locale.US, "%.2f", value)}",
+                    text = "${rate.code} $formattedValue",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
@@ -64,9 +76,9 @@ fun CurrencyItem(rate: CurrencyRate) {
 fun FluctuationIndicator(change: Double) {
     val color =
         when {
-            change > 0 -> Color(0xFF4CAF50)
-            change < 0 -> Color(0xFFF44336)
-            else -> Color.Gray
+            change > 0 -> SuccessGreen
+            change < 0 -> ErrorRed
+            else -> TextSecondary
         }
 
     val icon =

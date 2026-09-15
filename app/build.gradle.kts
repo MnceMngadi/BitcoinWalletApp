@@ -102,7 +102,10 @@ dependencies {
     // Navigation
     implementation(libs.navigation.compose)
 
-    testImplementation(libs.junit)
+    // Unit Testing
+    testImplementation(libs.junit) // Standard unit testing framework
+    testImplementation(libs.mockk) // Mocking library for Kotlin
+    testImplementation(libs.kotlinx.coroutines.test) // Coroutine testing utilities
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
