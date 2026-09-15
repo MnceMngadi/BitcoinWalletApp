@@ -5,69 +5,70 @@ import com.mncemngadi.bitcoinwalletapp.domain.repository.WalletRepository
 import com.mncemngadi.bitcoinwalletapp.domain.util.Either
 import com.mncemngadi.bitcoinwalletapp.domain.util.Failure
 import com.mncemngadi.bitcoinwalletapp.domain.util.map
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 
+/**
+ * Use case to fetch and calculate wallet data.
+ */
 class GetWalletDataUseCase
     @Inject
     constructor(
         private val repository: WalletRepository,
     ) {
         operator fun invoke(): Flow<Either<Failure, WalletData>> {
+            // Get saved BTC amount
             val btcAmountFlow = repository.getBtcAmount()
 
-            // We fetch rates and fluctuation for ZAR, USD, AUD
-            // Fixer free tier might only allow EUR as base.
-            // If so, we need to convert from EUR -> BTC and then EUR -> Other currencies.
-            // But for this project we'll assume we can use BTC as base or convert accordingly.
-
+            // Symbols to fetch from API
             val symbols = listOf("BTC", "ZAR", "USD", "AUD")
+            val apiBase = "BTC"
 
-            return combine(
-                btcAmountFlow,
+            // Fetch rates and fluctuation from API
+            val ratesFlow =
                 flow {
-                    val result = repository.getLatestRates("EUR", symbols)
+                    val result = repository.getLatestRates(apiBase, symbols)
 
-                    // Fetch fluctuation as well
-                    val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().time)
+                    // Get dates for fluctuation
+                    val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Calendar.getInstance().time)
                     val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.time
-                    val yesterdayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(yesterday)
+                    val yesterdayStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(yesterday)
 
-                    val fluctuationResult = repository.getFluctuation("BTC", symbols, yesterdayStr, today)
+                    // Fetch price fluctuation
+                    val fluctuationResult = repository.getFluctuation(apiBase, symbols, yesterdayStr, today)
 
                     val finalResult =
-                        result.map { rates ->
-                            // rates contains values relative to EUR
-                            // We need BTC price in EUR to convert to other currencies relative to BTC
-                            val btcInEur = rates.find { it.code == "BTC" }?.rate ?: 1.0
-
+                        result.map { currentRates ->
+                            // Get current BTC rate as base for conversion
+                            val btcToday = currentRates.find { it.code == "BTC" }?.rate ?: 1.0
                             val fluctuations = (fluctuationResult as? Either.Right)?.b ?: emptyMap()
 
-                            val btcBaseRates =
-                                rates.map { rate ->
-                                    // rate is 1 EUR = X code
-                                    // btcInEur is 1 EUR = Y BTC
-                                    // 1 BTC = (1/Y) EUR = (1/Y) * X code
-                                    val rateInBtc = rate.rate / btcInEur
-                                    rate.copy(
-                                        rate = rateInBtc,
-                                        fluctuation = fluctuations[rate.code],
-                                    )
-                                }
-                            btcBaseRates
-                        }
+                            currentRates.map { rateToday ->
+                                // Convert each rate to be relative to 1 BTC
+                                val rateInBtcToday = rateToday.rate / btcToday
 
+                                rateToday.copy(
+                                    rate = rateInBtcToday,
+                                    fluctuation = fluctuations[rateToday.code] ?: 0.0,
+                                )
+                            }
+                        }
                     emit(finalResult)
-                },
-            ) { amount, ratesEither ->
+                }.flowOn(Dispatchers.IO)
+
+            // Combine saved amount with network rates and calculate totals
+            return combine(btcAmountFlow, ratesFlow) { amount, ratesEither ->
                 ratesEither.map { rates ->
-                    WalletData(amount, rates)
+                    val calculatedRates = rates.map { it.copy(totalValue = it.rate * amount) }
+                    WalletData(amount, calculatedRates)
                 }
-            }
+            }.flowOn(Dispatchers.Default)
         }
     }

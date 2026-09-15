@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -7,6 +9,16 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ktlint)
 }
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+val fixerApiKey: String =
+    System.getenv("FIXER_API_KEY")
+        ?: localProperties.getProperty("FIXER_API_KEY")
+        ?: ""
 
 android {
     namespace = "com.mncemngadi.bitcoinwalletapp"
@@ -20,6 +32,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "FIXER_API_KEY", "\"$fixerApiKey\"")
     }
 
     buildTypes {
@@ -37,6 +51,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     kotlinOptions {
         jvmTarget = "17"
@@ -48,7 +63,7 @@ android {
     }
 }
 
-// ktlint dependencies for android insure good coding style makes sure that it ignores anotations with "Compasable"
+// Configure KtLint to ignore "Composable" annotations
 ktlint {
     version.set("1.1.1")
     android.set(true)
@@ -87,7 +102,10 @@ dependencies {
     // Navigation
     implementation(libs.navigation.compose)
 
-    testImplementation(libs.junit)
+    // Unit Testing
+    testImplementation(libs.junit) // Standard unit testing framework
+    testImplementation(libs.mockk) // Mocking library for Kotlin
+    testImplementation(libs.kotlinx.coroutines.test) // Coroutine testing utilities
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
