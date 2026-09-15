@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.mncemngadi.bitcoinwalletapp.presentation.ui.theme.TextSecondary
 
 @Composable
 fun ErrorDialog(
@@ -46,7 +47,7 @@ fun ErrorDialog(
                 TextButton(onClick = onDismiss) {
                     Text(
                         "Close",
-                        color = Color.Gray,
+                        color = TextSecondary,
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }

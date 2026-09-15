@@ -2,7 +2,13 @@ package com.mncemngadi.bitcoinwalletapp.data.remote.dto
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Data Transfer Objects (DTOs) for Fixer API responses.
+ * These classes are important as they define the structure for parsing raw JSON data from the API.
+ */
+
 @Serializable
+/** Response for the latest exchange rates. */
 data class LatestRatesDto(
     val success: Boolean,
     val timestamp: Long? = null,
@@ -13,6 +19,7 @@ data class LatestRatesDto(
 )
 
 @Serializable
+/** Response for price fluctuations. */
 data class FluctuationDto(
     val success: Boolean,
     val fluctuation: Boolean? = null,
@@ -24,6 +31,7 @@ data class FluctuationDto(
 )
 
 @Serializable
+/** Details for a specific currency's fluctuation. */
 data class FluctuationRateDto(
     val start_rate: Double,
     val end_rate: Double,
@@ -32,6 +40,7 @@ data class FluctuationRateDto(
 )
 
 @Serializable
+/** Error structure returned by the Fixer API. */
 data class FixerErrorDto(
     val code: Int,
     val type: String,

@@ -4,6 +4,7 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.mncemngadi.bitcoinwalletapp.BuildConfig
 import com.mncemngadi.bitcoinwalletapp.data.remote.AuthInterceptor
 import com.mncemngadi.bitcoinwalletapp.data.remote.BitcoinWalletApiService
+import com.mncemngadi.bitcoinwalletapp.util.Constants.BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,11 +16,15 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import javax.inject.Singleton
 
+/**
+ * Hilt module for providing network-related dependencies.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val BASE_URL = "https://api.apilayer.com/fixer/"
-
+    /**
+     * Provides a configured OkHttpClient with an auth interceptor and logging.
+     */
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
@@ -33,6 +38,9 @@ object NetworkModule {
             .build()
     }
 
+    /**
+     * Provides a configured Retrofit instance.
+     */
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
@@ -49,6 +57,9 @@ object NetworkModule {
             .build()
     }
 
+    /**
+     * Provides the API service implementation.
+     */
     @Provides
     @Singleton
     fun provideBitcoinWalletApiService(retrofit: Retrofit): BitcoinWalletApiService {

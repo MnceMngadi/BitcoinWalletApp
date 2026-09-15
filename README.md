@@ -42,21 +42,23 @@ To ensure a smooth user experience while respecting the Fixer API's free-tier li
 - **Request Decoupling**: API calls are triggered independently from user typing, ensuring we don't fire requests on every keystroke.
 - **Selective Fetching**: The app specifically requests only the required symbols (`BTC,ZAR,USD,AUD`) to minimize payload size and server load.
 
-### 2. Handling API Constraints (The "EUR Bridge")
-The Fixer API Free Tier has a strict "Base Currency" lock (EUR only). 
-- **The Solution**: To satisfy the requirement of having BTC as the base currency, the app fetches rates relative to EUR and mathematically converts them to a BTC-base locally within the `GetWalletDataUseCase`.
-
-### 3. Dynamic Fluctuation Calculation
+### 2. Dynamic Fluctuation Calculation
 Since the official `/fluctuation` endpoint is restricted to paid tiers:
 - **The Solution**: The app fetches current rates and historical rates from 2 days ago, then calculates the percentage change manually. This provides the user with real, live market movement data without requiring a premium API key.
 
-### 4. Visual Feedback & UX
+### 3. Visual Feedback & UX
 - **Custom Typography**: Integrated the **Poppins** font family for a modern, professional look.
 - **Styled Components**: 
     - **MyTopAppBar**: A custom header with a manual refresh action.
     - **BtcInputSection**: A refined input field with rounded corners and distinct labeling.
 - **Loading States**: A custom `LoadingDialog` centers a progress indicator while data is being fetched.
 - **Error Resilience**: Detailed error messages (e.g., Network Connection, API Rate Limits, or Server Errors) are parsed and displayed via a styled `ErrorDialog` with a **Retry** option.
+
+### 4. Automated Testing
+The project includes a suite of unit tests to ensure the reliability of core components:
+- **UseCase Tests**: Validates the mathematical conversion logic and data combination in `GetWalletDataUseCaseTest`.
+- **ViewModel Tests**: Ensures the UI state updates correctly in response to data changes and user interactions in `WalletViewModelTest`.
+- **Mocking**: Uses **MockK** for efficient dependency mocking and **Kotlinx Coroutines Test** for handling asynchronous logic.
 
 ---
 
@@ -102,4 +104,5 @@ If I were to take this app to a full production environment, I would implement t
 4. **API Key Setup (GitHub Actions)**:
     - If you are running the CI/CD pipeline, add your API key as a repository secret named `FIXER_API_KEY`.
 5. Run `./gradlew assembleDebug` to build or simply press **Run** in Android Studio.
-6. (Optional) Run `./gradlew ktlintCheck` to verify code styling.
+6. **Run Tests**: Execute `./gradlew test` to run all unit tests.
+7. (Optional) Run `./gradlew ktlintCheck` to verify code styling.
