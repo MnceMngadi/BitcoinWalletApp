@@ -46,7 +46,15 @@ To ensure a smooth user experience while respecting the Fixer API's free-tier li
 Since the official `/fluctuation` endpoint is restricted to paid tiers:
 - **The Solution**: The app fetches current rates and historical rates from 2 days ago, then calculates the percentage change manually. This provides the user with real, live market movement data without requiring a premium API key.
 
-### 3. Visual Feedback & UX
+### 3. Data Flow & Calculations
+The core "brain" of the app resides in the **Domain Layer**, specifically within the `GetWalletDataUseCase`:
+- **Reactive Stream**: The app combines a local `btcAmount` stream (from DataStore) with a remote `rates` stream (from API) using the Kotlin `combine` operator.
+- **Mathematical Conversion**: Since exchange rates can be volatile, the app fetches live rates relative to a base currency and converts them to be Bitcoin-centric: `Value = User_BTC_Amount * (Target_Rate / BTC_Rate)`.
+- **Threading Optimization**: 
+    - **I/O Operations**: Network fetching and disk access are offloaded to `Dispatchers.IO`.
+    - **Computational Work**: The mathematical multiplication for all currency cards is handled by `Dispatchers.Default`, ensuring zero impact on UI frame rates.
+
+### 4. Visual Feedback & UX
 - **Custom Typography**: Integrated the **Poppins** font family for a modern, professional look.
 - **Styled Components**: 
     - **MyTopAppBar**: A custom header with a manual refresh action.
